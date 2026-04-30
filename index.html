@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NMU Openhouse 2026 - System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { background-color: #f4f7f6; font-family: 'Sarabun', sans-serif; }
         .hidden { display: none; }
@@ -31,7 +32,7 @@
             <form id="registerForm">
                 <div class="mb-3">
                     <label class="form-label">เลขบัตรประจำตัวประชาชน (13 หลัก)</label>
-                    <input type="text" class="form-control" id="nationalId" required maxlength="13">
+                    <input type="text" class="form-control" id="nationalId" required maxlength="13" pattern="\d{13}" title="โปรดกรอกตัวเลข 13 หลัก">
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -117,7 +118,8 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // เพิ่ม getDocs และ where สำหรับการ Query เช็กข้อมูลซ้ำ
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCyhE_45kz9JzquKe5AaotnyvcU30g9AQQ",
@@ -132,27 +134,83 @@
     const db = getFirestore(app);
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwkjREwxic7mJhHWGmVPFFYTYI1v53sgy-JvtsjL5TwjtFnbYUeu1fnVCI8-lHOf3RCjA/exec";
 
-    let allData = []; // เก็บข้อมูลทั้งหมดจาก Firebase
+    let allData = []; 
     let currentPage = 1;
     let pageSize = 10;
+
+    // --- ฟังก์ชันตรวจสอบความถูกต้องของเลขบัตรประชาชน 13 หลัก ---
+    function validateThaiNationalID(id) {
+        if(id == null || id.length !== 13 || !/^[0-9]+$/.test(id)) return false;
+        let sum = 0;
+        for(let i = 0; i < 12; i++) {
+            sum += parseInt(id.charAt(i)) * (13 - i);
+        }
+        let mod = sum % 11;
+        let check = (11 - mod) % 10;
+        return check === parseInt(id.charAt(12));
+    }
 
     // --- การลงทะเบียน ---
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerText = "กำลังบันทึกข้อมูล...";
+        
+        const nationalId = document.getElementById('nationalId').value;
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
 
-        const formData = {
-            nationalId: document.getElementById('nationalId').value,
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
-            phone: document.getElementById('phone').value,
-            email: document.getElementById('email').value,
-            timestamp: new Date()
-        };
+        // 1. ตรวจสอบรูปแบบเลขบัตรประชาชน
+        if (!validateThaiNationalID(nationalId)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'ข้อมูลไม่ถูกต้อง',
+                text: 'เลขบัตรประจำตัวประชาชนไม่ถูกต้องตามรูปแบบ กรุณาตรวจสอบอีกครั้ง'
+            });
+            return;
+        }
+
+        // แสดง Loading ตอนกำลังเช็กข้อมูล
+        Swal.fire({
+            title: 'กำลังตรวจสอบข้อมูล...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
 
         try {
+            // 2. เช็กว่าเลขบัตรประชาชนซ้ำหรือไม่
+            const idQuery = query(collection(db, "registrations"), where("nationalId", "==", nationalId));
+            const idSnapshot = await getDocs(idQuery);
+            if (!idSnapshot.empty) {
+                Swal.fire({ icon: 'warning', title: 'ข้อมูลซ้ำ', text: 'เลขบัตรประจำตัวประชาชนนี้ ถูกใช้ลงทะเบียนไปแล้ว' });
+                return;
+            }
+
+            // 3. เช็กว่าอีเมลซ้ำหรือไม่
+            const emailQuery = query(collection(db, "registrations"), where("email", "==", email));
+            const emailSnapshot = await getDocs(emailQuery);
+            if (!emailSnapshot.empty) {
+                Swal.fire({ icon: 'warning', title: 'ข้อมูลซ้ำ', text: 'อีเมลนี้ ถูกใช้ลงทะเบียนไปแล้ว' });
+                return;
+            }
+
+            // หากผ่านทั้งหมด เปลี่ยนข้อความ Loading เป็นกำลังบันทึก
+            Swal.fire({
+                title: 'กำลังบันทึกข้อมูล...',
+                text: 'กรุณารอสักครู่',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            const formData = {
+                nationalId: nationalId,
+                firstName: firstName,
+                lastName: lastName,
+                phone: phone,
+                email: email,
+                timestamp: new Date()
+            };
+
             // บันทึก Firebase
             await addDoc(collection(db, "registrations"), formData);
             
@@ -167,21 +225,29 @@
 
             await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: urlParams });
             
-            alert("ลงทะเบียนสำเร็จ!");
-            document.getElementById('registerForm').reset();
+            // แจ้งเตือนเมื่อสำเร็จ
+            Swal.fire({
+                icon: 'success',
+                title: 'สำเร็จ!',
+                text: 'ลงทะเบียนเข้างาน NMU Openhouse 2026 เรียบร้อยแล้ว',
+                confirmButtonText: 'ตกลง'
+            }).then(() => {
+                document.getElementById('registerForm').reset();
+            });
+
         } catch (error) {
-            alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "ยืนยันการลงทะเบียน";
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด',
+                text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง หรือติดต่อเจ้าหน้าที่'
+            });
         }
     });
 
-    // --- ระบบ Real-time Dashboard ---
+    // --- ระบบ Real-time Dashboard (เหมือนเดิม) ---
     function initRealtimeData() {
         const q = query(collection(db, "registrations"), orderBy("timestamp", "desc"));
-        
-        // ใช้ onSnapshot เพื่อดึงข้อมูลแบบ Real-time
         onSnapshot(q, (snapshot) => {
             allData = [];
             snapshot.forEach((doc) => {
@@ -224,29 +290,20 @@
     }
 
     function updatePaginationUI(totalItems, totalPages, startIdx, endIdx) {
-        // อัปเดตข้อมูลจำนวน
         document.getElementById('paginationInfo').innerText = `แสดง ${totalItems > 0 ? startIdx + 1 : 0} ถึง ${endIdx} จาก ${totalItems} รายการ`;
-
-        // สร้างปุ่ม Pagination
         const nav = document.getElementById('paginationNav');
         let navHtml = `
             <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
                 <a class="page-link" onclick="window.changePage(${currentPage - 1})">ย้อนกลับ</a>
             </li>
         `;
-
         for (let i = 1; i <= totalPages; i++) {
             if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                navHtml += `
-                    <li class="page-item ${i === currentPage ? 'active' : ''}">
-                        <a class="page-link" onclick="window.changePage(${i})">${i}</a>
-                    </li>
-                `;
+                navHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" onclick="window.changePage(${i})">${i}</a></li>`;
             } else if (i === currentPage - 2 || i === currentPage + 2) {
                 navHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
             }
         }
-
         navHtml += `
             <li class="page-item ${currentPage === totalPages || totalItems === 0 ? 'disabled' : ''}">
                 <a class="page-link" onclick="window.changePage(${currentPage + 1})">ถัดไป</a>
@@ -255,7 +312,7 @@
         nav.innerHTML = navHtml;
     }
 
-    // --- Window functions (เพื่อให้ HTML เรียกใช้ได้) ---
+    // --- Window functions ---
     window.showSection = (sectionId) => {
         ['registrationSection', 'loginSection', 'dashboardSection'].forEach(s => {
             document.getElementById(s).classList.add('hidden');
@@ -266,10 +323,17 @@
     window.handleLogin = async () => {
         const user = document.getElementById('adminUser').value;
         const pass = document.getElementById('adminPass').value;
-        const btn = document.getElementById('loginBtn');
-        
-        btn.disabled = true;
-        btn.innerText = "กำลังตรวจสอบ...";
+
+        if (!user || !pass) {
+            Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณากรอกชื่อผู้ใช้งานและรหัสผ่านให้ครบถ้วน' });
+            return;
+        }
+
+        Swal.fire({
+            title: 'กำลังเข้าสู่ระบบ...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
 
         const params = new URLSearchParams();
         params.append('action', 'login');
@@ -281,18 +345,16 @@
             const data = await resp.json();
 
             if (data.result === "authorized") {
+                Swal.close(); // ปิด loading
                 showSection('dashboardSection');
                 document.getElementById('adminBtn').classList.add('hidden');
                 document.getElementById('logoutBtn').classList.remove('hidden');
-                initRealtimeData(); // เริ่มทำงานระบบ Real-time หลัง Login สำเร็จ
+                initRealtimeData();
             } else {
-                alert("Username หรือ Password ไม่ถูกต้อง");
+                Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบล้มเหลว', text: 'ชื่อผู้ใช้งาน หรือ รหัสผ่าน ไม่ถูกต้อง' });
             }
         } catch (e) {
-            alert("การเชื่อมต่อผิดพลาด");
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "เข้าสู่ระบบ";
+            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่' });
         }
     };
 
@@ -308,7 +370,18 @@
     };
 
     window.handleLogout = () => {
-        location.reload();
+        Swal.fire({
+            title: 'ยืนยันการออกจากระบบ?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ออกจากระบบ',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#dc3545'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                location.reload();
+            }
+        });
     };
 
 </script>
