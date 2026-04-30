@@ -3,122 +3,681 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NMU Openhouse 2026 - System</title>
+    <title>NMU Openhouse 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { background-color: #f4f7f6; font-family: 'Sarabun', sans-serif; }
-        .hidden { display: none; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .navbar { margin-bottom: 30px; }
-        .page-link { cursor: pointer; }
+        :root {
+            --ink: #0d0d0d;
+            --cream: #f5f0e8;
+            --gold: #c9a84c;
+            --gold-light: #e8d4a0;
+            --deep: #1a1a2e;
+            --muted: #7a7a7a;
+            --border: rgba(201, 168, 76, 0.3);
+            --card-bg: rgba(255,255,255,0.85);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--cream);
+            font-family: 'Sarabun', sans-serif;
+            font-weight: 400;
+            color: var(--ink);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ─── BACKGROUND ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 10% 0%, rgba(201,168,76,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 90% 100%, rgba(26,26,46,0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── NAVBAR ─── */
+        .topbar {
+            position: relative;
+            z-index: 100;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-brand {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar-brand .subtitle {
+            font-size: 11px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .topbar-brand .title {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--ink);
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-outline-gold {
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            background: transparent;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 2px;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline-gold:hover {
+            background: var(--gold);
+            color: white;
+        }
+
+        .btn-danger-sm {
+            border: 1px solid #c0392b;
+            color: #c0392b;
+            background: transparent;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 2px;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
+        }
+
+        .btn-danger-sm:hover { background: #c0392b; color: white; }
+
+        .hidden { display: none !important; }
+
+        /* ─── HERO / REGISTRATION ─── */
+        #registrationSection {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px 80px;
+        }
+
+        .hero-label {
+            font-size: 11px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero-label::before,
+        .hero-label::after {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 1px;
+            background: var(--gold);
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(42px, 7vw, 72px);
+            font-weight: 900;
+            color: var(--ink);
+            text-align: center;
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+            margin-bottom: 12px;
+        }
+
+        .hero-title span {
+            color: var(--gold);
+            font-style: italic;
+        }
+
+        .hero-sub {
+            font-size: 15px;
+            color: var(--muted);
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 300;
+            letter-spacing: 0.02em;
+        }
+
+        /* ─── FORM CARD ─── */
+        .form-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 48px 48px;
+            width: 100%;
+            max-width: 560px;
+            box-shadow:
+                0 2px 4px rgba(0,0,0,0.04),
+                0 20px 60px rgba(0,0,0,0.08);
+            animation: fadeUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 13px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-label-custom {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--ink);
+            margin-bottom: 8px;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1.5px solid rgba(0,0,0,0.15);
+            border-radius: 0;
+            padding: 10px 4px;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 15px;
+            font-weight: 400;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control-custom::placeholder { color: #bbb; }
+
+        .form-control-custom:focus {
+            border-bottom-color: var(--gold);
+            background: transparent;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--ink);
+            color: var(--gold-light);
+            border: none;
+            border-radius: 2px;
+            padding: 16px;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gold);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+            z-index: 0;
+        }
+
+        .btn-submit:hover::after { transform: scaleX(1); }
+        .btn-submit:hover { color: var(--ink); }
+
+        .btn-submit span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ─── LOGIN ─── */
+        #loginSection {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 44px 44px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            animation: fadeUp 0.5s ease forwards;
+        }
+
+        .login-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+
+        .login-sub {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 32px;
+        }
+
+        .btn-back-link {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-family: 'Sarabun', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+            text-decoration: none;
+            margin-top: 16px;
+        }
+
+        .btn-back-link:hover { color: var(--ink); }
+
+        /* ─── DASHBOARD ─── */
+        #dashboardSection {
+            position: relative;
+            z-index: 10;
+            padding: 40px 24px 60px;
+        }
+
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dash-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .dash-badge {
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot-live {
+            width: 7px; height: 7px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        .table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+        }
+
+        .table-toolbar {
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(201,168,76,0.04);
+        }
+
+        .table-toolbar label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .select-custom {
+            border: 1px solid var(--border);
+            background: white;
+            padding: 5px 10px;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 13px;
+            border-radius: 2px;
+            outline: none;
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead th {
+            background: var(--ink);
+            color: var(--gold-light);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 14px 24px;
+            text-align: left;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover { background: rgba(201,168,76,0.05); }
+
+        tbody td {
+            padding: 14px 24px;
+            font-size: 14px;
+            color: var(--ink);
+            vertical-align: middle;
+        }
+
+        tbody td:first-child {
+            font-weight: 700;
+            color: var(--gold);
+            font-size: 13px;
+        }
+
+        .table-footer {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            background: rgba(201,168,76,0.03);
+        }
+
+        #paginationInfo {
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+        }
+
+        .pagination-custom {
+            display: flex;
+            gap: 4px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .pagination-custom li a,
+        .pagination-custom li span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink);
+            cursor: pointer;
+            transition: all 0.15s;
+            background: white;
+            text-decoration: none;
+        }
+
+        .pagination-custom li.active a {
+            background: var(--ink);
+            color: var(--gold-light);
+            border-color: var(--ink);
+        }
+
+        .pagination-custom li.disabled span,
+        .pagination-custom li.disabled a {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .pagination-custom li:not(.disabled):not(.active) a:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: white;
+        }
+
+        /* ─── DECORATIVE ─── */
+        .ornament {
+            text-align: center;
+            color: var(--gold);
+            font-size: 22px;
+            letter-spacing: 0.3em;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 600px) {
+            .topbar { padding: 16px 20px; }
+            .form-card, .login-card { padding: 32px 24px; }
+            .form-row { grid-template-columns: 1fr; gap: 0; }
+            .hero-title { font-size: 36px; }
+            .dash-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            thead th, tbody td { padding: 12px 14px; }
+        }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="#" onclick="showSection('registrationSection')">NMU Openhouse 2026</a>
-        <button class="btn btn-outline-light btn-sm" id="adminBtn" onclick="showSection('loginSection')">สำหรับเจ้าหน้าที่</button>
-        <button class="btn btn-danger btn-sm hidden" id="logoutBtn" onclick="handleLogout()">ออกจากระบบ</button>
+<!-- ─── TOPBAR ─── -->
+<nav class="topbar">
+    <div class="topbar-brand" style="cursor:pointer" onclick="window.showSection('registrationSection')">
+        <span class="subtitle">มหาวิทยาลัยนวมินทราธิราช</span>
+        <span class="title">NMU Openhouse 2026</span>
+    </div>
+    <div class="topbar-actions">
+        <button class="btn-outline-gold" id="adminBtn" onclick="window.showSection('loginSection')">สำหรับเจ้าหน้าที่</button>
+        <button class="btn-danger-sm hidden" id="logoutBtn" onclick="window.handleLogout()">ออกจากระบบ</button>
     </div>
 </nav>
 
-<div class="container mb-5">
-    
-    <div id="registrationSection" class="row justify-content-center">
-        <div class="col-md-6 card p-4">
-            <h2 class="text-center mb-4 text-primary">ลงทะเบียนเข้างาน</h2>
-            <form id="registerForm">
-                <div class="mb-3">
-                    <label class="form-label">เลขบัตรประจำตัวประชาชน (13 หลัก)</label>
-                    <input type="text" class="form-control" id="nationalId" required maxlength="13" pattern="\d{13}" title="โปรดกรอกตัวเลข 13 หลัก">
+<!-- ─── REGISTRATION ─── -->
+<div id="registrationSection">
+    <div class="hero-label">เปิดรับลงทะเบียน</div>
+    <h1 class="hero-title">ยินดีต้อนรับสู่<br><span>Open House</span></h1>
+    <p class="hero-sub">ลงทะเบียนเข้าร่วมงานมหาวิทยาลัยนวมินทราธิราช ประจำปี 2026</p>
+
+    <div class="form-card">
+        <div class="ornament">✦ ✦ ✦</div>
+        <p class="form-section-title">ข้อมูลผู้ลงทะเบียน</p>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label class="form-label-custom">เลขบัตรประจำตัวประชาชน</label>
+                <input type="text" class="form-control-custom" id="nationalId"
+                    required maxlength="13" pattern="\d{13}"
+                    placeholder="X-XXXX-XXXXX-XX-X">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label-custom">ชื่อ</label>
+                    <input type="text" class="form-control-custom" id="firstName" required placeholder="ชื่อ">
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">ชื่อ</label>
-                        <input type="text" class="form-control" id="firstName" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">นามสกุล</label>
-                        <input type="text" class="form-control" id="lastName" required>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label-custom">นามสกุล</label>
+                    <input type="text" class="form-control-custom" id="lastName" required placeholder="นามสกุล">
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">เบอร์โทรศัพท์</label>
-                    <input type="tel" class="form-control" id="phone" required>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label">อีเมล</label>
-                    <input type="email" class="form-control" id="email" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100" id="submitBtn">ยืนยันการลงทะเบียน</button>
-            </form>
-        </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label-custom">เบอร์โทรศัพท์</label>
+                <input type="tel" class="form-control-custom" id="phone" required placeholder="0XX-XXX-XXXX">
+            </div>
+
+            <div class="form-group" style="margin-bottom:32px">
+                <label class="form-label-custom">อีเมล</label>
+                <input type="email" class="form-control-custom" id="email" required placeholder="example@email.com">
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span>ยืนยันการลงทะเบียน →</span>
+            </button>
+        </form>
     </div>
-
-    <div id="loginSection" class="row justify-content-center hidden">
-        <div class="col-md-4 card p-4">
-            <h3 class="text-center mb-4">Admin Login</h3>
-            <div class="mb-3">
-                <input type="text" id="adminUser" class="form-control" placeholder="ชื่อผู้ใช้งาน">
-            </div>
-            <div class="mb-3">
-                <input type="password" id="adminPass" class="form-control" placeholder="รหัสผ่าน">
-            </div>
-            <button class="btn btn-dark w-100" id="loginBtn" onclick="handleLogin()">เข้าสู่ระบบ</button>
-            <button class="btn btn-link w-100 mt-2" onclick="showSection('registrationSection')">กลับหน้าลงทะเบียน</button>
-        </div>
-    </div>
-
-    <div id="dashboardSection" class="row hidden">
-        <div class="col-12 card p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3>รายชื่อผู้ลงทะเบียน (Real-time)</h3>
-                <div class="d-flex align-items-center">
-                    <span class="me-2">แสดง</span>
-                    <select class="form-select form-select-sm w-auto" id="pageSizeSelect" onchange="window.changePageSize(this.value)">
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                    <span class="ms-2">แถว</span>
-                </div>
-            </div>
-            
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ลำดับ</th>
-                            <th>วัน-เวลา</th>
-                            <th>ชื่อ-นามสกุล</th>
-                            <th>เบอร์โทรศัพท์</th>
-                            <th>อีเมล</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="5" class="text-center">กำลังโหลดข้อมูล...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <div id="paginationInfo">แสดง 0 ถึง 0 จาก 0 รายการ</div>
-                <nav>
-                    <ul class="pagination pagination-sm mb-0" id="paginationNav">
-                        </ul>
-                </nav>
-            </div>
-        </div>
-    </div>
-
 </div>
 
+<!-- ─── LOGIN ─── -->
+<div id="loginSection" class="hidden">
+    <div class="login-card">
+        <div class="ornament" style="text-align:left;margin-bottom:12px">✦</div>
+        <h2 class="login-title">Admin Login</h2>
+        <p class="login-sub">สำหรับเจ้าหน้าที่เท่านั้น</p>
+
+        <div class="form-group">
+            <label class="form-label-custom">ชื่อผู้ใช้งาน</label>
+            <input type="text" id="adminUser" class="form-control-custom" placeholder="username">
+        </div>
+        <div class="form-group" style="margin-bottom:32px">
+            <label class="form-label-custom">รหัสผ่าน</label>
+            <input type="password" id="adminPass" class="form-control-custom" placeholder="••••••••">
+        </div>
+
+        <button class="btn-submit" id="loginBtn" onclick="window.handleLogin()">
+            <span>เข้าสู่ระบบ →</span>
+        </button>
+
+        <a class="btn-back-link" onclick="window.showSection('registrationSection')">
+            ← กลับหน้าลงทะเบียน
+        </a>
+    </div>
+</div>
+
+<!-- ─── DASHBOARD ─── -->
+<div id="dashboardSection" class="hidden">
+    <div class="dash-header">
+        <div>
+            <h2 class="dash-title">รายชื่อผู้ลงทะเบียน</h2>
+        </div>
+        <div class="dash-badge">
+            <span class="dot-live"></span> Real-time
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div class="table-toolbar">
+            <label>แสดง</label>
+            <select class="select-custom" id="pageSizeSelect" onchange="window.changePageSize(this.value)">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <label>แถวต่อหน้า</label>
+        </div>
+
+        <div style="overflow-x:auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>วัน-เวลา</th>
+                        <th>ชื่อ-นามสกุล</th>
+                        <th>เบอร์โทรศัพท์</th>
+                        <th>อีเมล</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">กำลังโหลดข้อมูล...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-footer">
+            <div id="paginationInfo">แสดง 0 ถึง 0 จาก 0 รายการ</div>
+            <ul class="pagination-custom" id="paginationNav"></ul>
+        </div>
+    </div>
+</div>
+
+<!-- ─── FIREBASE LOGIC (unchanged) ─── -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    // เพิ่ม getDocs และ where สำหรับการ Query เช็กข้อมูลซ้ำ
     import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -134,125 +693,65 @@
     const db = getFirestore(app);
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwkjREwxic7mJhHWGmVPFFYTYI1v53sgy-JvtsjL5TwjtFnbYUeu1fnVCI8-lHOf3RCjA/exec";
 
-    let allData = []; 
+    let allData = [];
     let currentPage = 1;
     let pageSize = 10;
 
-    // --- ฟังก์ชันตรวจสอบความถูกต้องของเลขบัตรประชาชน 13 หลัก ---
     function validateThaiNationalID(id) {
-        if(id == null || id.length !== 13 || !/^[0-9]+$/.test(id)) return false;
+        if (id == null || id.length !== 13 || !/^[0-9]+$/.test(id)) return false;
         let sum = 0;
-        for(let i = 0; i < 12; i++) {
-            sum += parseInt(id.charAt(i)) * (13 - i);
-        }
+        for (let i = 0; i < 12; i++) sum += parseInt(id.charAt(i)) * (13 - i);
         let mod = sum % 11;
         let check = (11 - mod) % 10;
         return check === parseInt(id.charAt(12));
     }
 
-    // --- การลงทะเบียน ---
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const nationalId = document.getElementById('nationalId').value;
-        const firstName = document.getElementById('firstName').value;
-        const lastName = document.getElementById('lastName').value;
-        const phone = document.getElementById('phone').value;
-        const email = document.getElementById('email').value;
+        const firstName  = document.getElementById('firstName').value;
+        const lastName   = document.getElementById('lastName').value;
+        const phone      = document.getElementById('phone').value;
+        const email      = document.getElementById('email').value;
 
-        // 1. ตรวจสอบรูปแบบเลขบัตรประชาชน
         if (!validateThaiNationalID(nationalId)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'ข้อมูลไม่ถูกต้อง',
-                text: 'เลขบัตรประจำตัวประชาชนไม่ถูกต้องตามรูปแบบ กรุณาตรวจสอบอีกครั้ง'
-            });
+            Swal.fire({ icon: 'error', title: 'ข้อมูลไม่ถูกต้อง', text: 'เลขบัตรประจำตัวประชาชนไม่ถูกต้องตามรูปแบบ กรุณาตรวจสอบอีกครั้ง' });
             return;
         }
 
-        // แสดง Loading ตอนกำลังเช็กข้อมูล
-        Swal.fire({
-            title: 'กำลังตรวจสอบข้อมูล...',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
+        Swal.fire({ title: 'กำลังตรวจสอบข้อมูล...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
 
         try {
-            // 2. เช็กว่าเลขบัตรประชาชนซ้ำหรือไม่
-            const idQuery = query(collection(db, "registrations"), where("nationalId", "==", nationalId));
-            const idSnapshot = await getDocs(idQuery);
-            if (!idSnapshot.empty) {
-                Swal.fire({ icon: 'warning', title: 'ข้อมูลซ้ำ', text: 'เลขบัตรประจำตัวประชาชนนี้ ถูกใช้ลงทะเบียนไปแล้ว' });
-                return;
-            }
+            const idSnap = await getDocs(query(collection(db, "registrations"), where("nationalId", "==", nationalId)));
+            if (!idSnap.empty) { Swal.fire({ icon: 'warning', title: 'ข้อมูลซ้ำ', text: 'เลขบัตรประจำตัวประชาชนนี้ ถูกใช้ลงทะเบียนไปแล้ว' }); return; }
 
-            // 3. เช็กว่าอีเมลซ้ำหรือไม่
-            const emailQuery = query(collection(db, "registrations"), where("email", "==", email));
-            const emailSnapshot = await getDocs(emailQuery);
-            if (!emailSnapshot.empty) {
-                Swal.fire({ icon: 'warning', title: 'ข้อมูลซ้ำ', text: 'อีเมลนี้ ถูกใช้ลงทะเบียนไปแล้ว' });
-                return;
-            }
+            const emailSnap = await getDocs(query(collection(db, "registrations"), where("email", "==", email)));
+            if (!emailSnap.empty) { Swal.fire({ icon: 'warning', title: 'ข้อมูลซ้ำ', text: 'อีเมลนี้ ถูกใช้ลงทะเบียนไปแล้ว' }); return; }
 
-            // หากผ่านทั้งหมด เปลี่ยนข้อความ Loading เป็นกำลังบันทึก
-            Swal.fire({
-                title: 'กำลังบันทึกข้อมูล...',
-                text: 'กรุณารอสักครู่',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
+            Swal.fire({ title: 'กำลังบันทึกข้อมูล...', text: 'กรุณารอสักครู่', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
 
-            const formData = {
-                nationalId: nationalId,
-                firstName: firstName,
-                lastName: lastName,
-                phone: phone,
-                email: email,
-                timestamp: new Date()
-            };
-
-            // บันทึก Firebase
+            const formData = { nationalId, firstName, lastName, phone, email, timestamp: new Date() };
             await addDoc(collection(db, "registrations"), formData);
-            
-            // บันทึก Google Sheet
+
             const urlParams = new URLSearchParams();
             urlParams.append('action', 'register');
-            urlParams.append('nationalId', formData.nationalId);
-            urlParams.append('firstName', formData.firstName);
-            urlParams.append('lastName', formData.lastName);
-            urlParams.append('phone', formData.phone);
-            urlParams.append('email', formData.email);
-
+            Object.entries(formData).forEach(([k, v]) => { if (k !== 'timestamp') urlParams.append(k, v); });
             await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: urlParams });
-            
-            // แจ้งเตือนเมื่อสำเร็จ
-            Swal.fire({
-                icon: 'success',
-                title: 'สำเร็จ!',
-                text: 'ลงทะเบียนเข้างาน NMU Openhouse 2026 เรียบร้อยแล้ว',
-                confirmButtonText: 'ตกลง'
-            }).then(() => {
-                document.getElementById('registerForm').reset();
-            });
+
+            Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: 'ลงทะเบียนเข้างาน NMU Openhouse 2026 เรียบร้อยแล้ว', confirmButtonText: 'ตกลง' })
+                .then(() => document.getElementById('registerForm').reset());
 
         } catch (error) {
             console.error(error);
-            Swal.fire({
-                icon: 'error',
-                title: 'เกิดข้อผิดพลาด',
-                text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง หรือติดต่อเจ้าหน้าที่'
-            });
+            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง หรือติดต่อเจ้าหน้าที่' });
         }
     });
 
-    // --- ระบบ Real-time Dashboard (เหมือนเดิม) ---
     function initRealtimeData() {
         const q = query(collection(db, "registrations"), orderBy("timestamp", "desc"));
         onSnapshot(q, (snapshot) => {
             allData = [];
-            snapshot.forEach((doc) => {
-                allData.push(doc.data());
-            });
+            snapshot.forEach((doc) => allData.push(doc.data()));
             renderTable();
         });
     }
@@ -261,7 +760,6 @@
         const body = document.getElementById('tableBody');
         const totalItems = allData.length;
         const totalPages = Math.ceil(totalItems / pageSize);
-
         if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
 
         const startIdx = (currentPage - 1) * pageSize;
@@ -269,50 +767,43 @@
         const displayData = allData.slice(startIdx, endIdx);
 
         if (totalItems === 0) {
-            body.innerHTML = '<tr><td colspan="5" class="text-center">ยังไม่มีผู้ลงทะเบียน</td></tr>';
+            body.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted)">ยังไม่มีผู้ลงทะเบียน</td></tr>';
             return;
         }
 
         body.innerHTML = displayData.map((data, index) => {
             const time = data.timestamp?.toDate ? data.timestamp.toDate().toLocaleString('th-TH') : '-';
-            return `
-                <tr>
-                    <td>${startIdx + index + 1}</td>
-                    <td>${time}</td>
-                    <td>${data.firstName} ${data.lastName}</td>
-                    <td>${data.phone}</td>
-                    <td>${data.email}</td>
-                </tr>
-            `;
+            return `<tr>
+                <td>${startIdx + index + 1}</td>
+                <td style="font-size:13px;color:var(--muted)">${time}</td>
+                <td style="font-weight:600">${data.firstName} ${data.lastName}</td>
+                <td>${data.phone}</td>
+                <td style="font-size:13px">${data.email}</td>
+            </tr>`;
         }).join('');
 
         updatePaginationUI(totalItems, totalPages, startIdx, endIdx);
     }
 
     function updatePaginationUI(totalItems, totalPages, startIdx, endIdx) {
-        document.getElementById('paginationInfo').innerText = `แสดง ${totalItems > 0 ? startIdx + 1 : 0} ถึง ${endIdx} จาก ${totalItems} รายการ`;
+        document.getElementById('paginationInfo').innerText =
+            `แสดง ${totalItems > 0 ? startIdx + 1 : 0} ถึง ${endIdx} จาก ${totalItems} รายการ`;
+
         const nav = document.getElementById('paginationNav');
-        let navHtml = `
-            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                <a class="page-link" onclick="window.changePage(${currentPage - 1})">ย้อนกลับ</a>
-            </li>
-        `;
+        let navHtml = `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a onclick="window.changePage(${currentPage - 1})">‹</a></li>`;
         for (let i = 1; i <= totalPages; i++) {
             if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                navHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" onclick="window.changePage(${i})">${i}</a></li>`;
+                navHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a onclick="window.changePage(${i})">${i}</a></li>`;
             } else if (i === currentPage - 2 || i === currentPage + 2) {
-                navHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                navHtml += `<li class="page-item disabled"><span>…</span></li>`;
             }
         }
-        navHtml += `
-            <li class="page-item ${currentPage === totalPages || totalItems === 0 ? 'disabled' : ''}">
-                <a class="page-link" onclick="window.changePage(${currentPage + 1})">ถัดไป</a>
-            </li>
-        `;
+        navHtml += `<li class="page-item ${currentPage === totalPages || totalItems === 0 ? 'disabled' : ''}">
+            <a onclick="window.changePage(${currentPage + 1})">›</a></li>`;
         nav.innerHTML = navHtml;
     }
 
-    // --- Window functions ---
     window.showSection = (sectionId) => {
         ['registrationSection', 'loginSection', 'dashboardSection'].forEach(s => {
             document.getElementById(s).classList.add('hidden');
@@ -323,17 +814,9 @@
     window.handleLogin = async () => {
         const user = document.getElementById('adminUser').value;
         const pass = document.getElementById('adminPass').value;
+        if (!user || !pass) { Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณากรอกชื่อผู้ใช้งานและรหัสผ่านให้ครบถ้วน' }); return; }
 
-        if (!user || !pass) {
-            Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณากรอกชื่อผู้ใช้งานและรหัสผ่านให้ครบถ้วน' });
-            return;
-        }
-
-        Swal.fire({
-            title: 'กำลังเข้าสู่ระบบ...',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
+        Swal.fire({ title: 'กำลังเข้าสู่ระบบ...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
 
         const params = new URLSearchParams();
         params.append('action', 'login');
@@ -343,10 +826,9 @@
         try {
             const resp = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: params });
             const data = await resp.json();
-
             if (data.result === "authorized") {
-                Swal.close(); // ปิด loading
-                showSection('dashboardSection');
+                Swal.close();
+                window.showSection('dashboardSection');
                 document.getElementById('adminBtn').classList.add('hidden');
                 document.getElementById('logoutBtn').classList.remove('hidden');
                 initRealtimeData();
@@ -358,17 +840,8 @@
         }
     };
 
-    window.changePage = (page) => {
-        currentPage = page;
-        renderTable();
-    };
-
-    window.changePageSize = (size) => {
-        pageSize = parseInt(size);
-        currentPage = 1;
-        renderTable();
-    };
-
+    window.changePage = (page) => { currentPage = page; renderTable(); };
+    window.changePageSize = (size) => { pageSize = parseInt(size); currentPage = 1; renderTable(); };
     window.handleLogout = () => {
         Swal.fire({
             title: 'ยืนยันการออกจากระบบ?',
@@ -377,13 +850,8 @@
             confirmButtonText: 'ออกจากระบบ',
             cancelButtonText: 'ยกเลิก',
             confirmButtonColor: '#dc3545'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                location.reload();
-            }
-        });
+        }).then((result) => { if (result.isConfirmed) location.reload(); });
     };
-
 </script>
 
 </body>
